@@ -1,5 +1,8 @@
 import { Component } from '@angular/core';
-
+import { Broadcaster } from '../../services/broadcaster.service';
+import { Events } from '../../services/events';
+import { Week } from '../../week';
+import { WeekService } from '../../services/week.service';
 
 /**
  * Generated class for the WeekHeaderComponent component.
@@ -13,34 +16,30 @@ import { Component } from '@angular/core';
 })
 export class WeekHeaderComponent {
 
-  currentWeek: string = "";
+
+  currentWeekString: string = "";
+  currentYear: string = "";
   currentDate: Date;
   
 
-  constructor() {
-    this.currentDate = new Date();
+  constructor(private broadcaster: Broadcaster, private weekService : WeekService) {
+    this.currentDate = this.weekService.getToday();
     this.setCurrentWeek();
-    
   }
 
   setCurrentWeek()
   {
-    let monday: Date = new Date();
-    let sunday: Date = new Date();
-    console.log("Current: " +  this.currentDate);
-    monday.setDate(this.currentDate.getDate() - this.currentDate.getDay() + 1);
-    console.log("Monday: " +  monday);
-    sunday.setDate(monday.getDate() + 6);
-    this.currentWeek =  monday.getDate() + "/" +
-                      sunday.getMonth() + " -- " +
-                      sunday.getDate() + "/" +
-                      sunday.getMonth()
+    let week : Week = this.weekService.getWeek(this.currentDate);
+    this.currentWeekString =  week.start.getDate() + "/" +
+                      (week.start.getMonth() + 1) + " -- " +
+                      week.end.getDate() + "/" +
+                      (week.end.getMonth() + 1);
+    this.currentYear = this.currentDate.getFullYear().toString(); 
+    this.broadcaster.broadcast(Events.WEEK_CHANGED, week);
   }
 
   prevWeek()
   {
-    console.log("prev ");
-    
     this.currentDate.setDate(this.currentDate.getDate() - 7);
     this.setCurrentWeek();
   }
